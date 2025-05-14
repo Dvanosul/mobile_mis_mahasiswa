@@ -25,7 +25,7 @@ class LoginPage extends StatelessWidget {
               ),
               const SizedBox(height: 20),
               const Text(
-                'Enter your E-ID and Password\nfor Authentication',
+                'Enter your Email and Password\nfor Authentication',
                 style: TextStyle(
                   fontSize: 14,
                   color: Colors.grey,
@@ -33,7 +33,7 @@ class LoginPage extends StatelessWidget {
               ),
               const SizedBox(height: 40),
               const Text(
-                'E - ID',
+                'Email',
                 style: TextStyle(
                   fontSize: 12,
                   letterSpacing: 2,
@@ -43,7 +43,7 @@ class LoginPage extends StatelessWidget {
               const SizedBox(height: 8),
               TextField(
                 decoration: InputDecoration(
-                  hintText: 'yourmail@shrestha.com',
+                  hintText: 'yourmail@example.com',
                   filled: true,
                   fillColor: const Color(0xFFF2F2F2),
                   border: OutlineInputBorder(
@@ -54,7 +54,7 @@ class LoginPage extends StatelessWidget {
               ),
               const SizedBox(height: 24),
               const Text(
-                'PASSWORD',
+                'Password',
                 style: TextStyle(
                   fontSize: 12,
                   letterSpacing: 2,

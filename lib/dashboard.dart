@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:mobile_mis_mahasiswa/widgets/frs_form.dart'; 
+import 'package:mobile_mis_mahasiswa/widgets/jadwal_card.dart'; 
+import 'package:mobile_mis_mahasiswa/widgets/nilai_card.dart'; 
+import 'package:mobile_mis_mahasiswa/widgets/custom_navbar.dart'; 
 
 class DashboardPage extends StatelessWidget {
   const DashboardPage({super.key});
@@ -7,29 +11,7 @@ class DashboardPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      bottomNavigationBar: BottomNavigationBar(
-        selectedItemColor: Colors.black,
-        unselectedItemColor: Colors.black,
-        backgroundColor: const Color(0xFF8F98F8),
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home_outlined),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.assignment_outlined),
-            label: 'FRS',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.calendar_today_outlined),
-            label: 'Jadwal',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.logout),
-            label: 'Logout',
-          ),
-        ],
-      ),
+      bottomNavigationBar: CustomNavBar(currentIndex: 0, context: context), 
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16),
@@ -62,8 +44,8 @@ class DashboardPage extends StatelessWidget {
                           ),
                         ),
                         SizedBox(height: 4),
-                        Text('Nur Rosyid M'),
-                        Text('3123500075'),
+                        Text('M Ghazali'),
+                        Text('3123500033'),
                       ],
                     ),
                   ],
@@ -83,9 +65,9 @@ class DashboardPage extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  _featureCard(Icons.edit_note, 'FRS'),
-                  _featureCard(Icons.calendar_month, 'Jadwal Kuliah'),
-                  _featureCard(Icons.bar_chart, 'Nilai'),
+                  _featureCard(context, Icons.edit_note, 'FRS', const FrsPage()),
+                  _featureCard(context, Icons.calendar_month, 'Jadwal Kuliah', const JadwalCardPage()),
+                  _featureCard(context, Icons.bar_chart, 'Nilai', const NilaiCardPage()),
                 ],
               ),
 
@@ -110,24 +92,32 @@ class DashboardPage extends StatelessWidget {
     );
   }
 
-  Widget _featureCard(IconData icon, String title) {
-    return Column(
-      children: [
-        Container(
-          width: 80,
-          height: 80,
-          decoration: BoxDecoration(
-            color: Colors.grey.shade300,
-            borderRadius: BorderRadius.circular(12),
+  Widget _featureCard(BuildContext context, IconData icon, String title, Widget destinationPage) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => destinationPage),
+        );
+      },
+      child: Column(
+        children: [
+          Container(
+            width: 80,
+            height: 80,
+            decoration: BoxDecoration(
+              color: Colors.grey.shade300,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, size: 32, color: Colors.black87),
           ),
-          child: Icon(icon, size: 32, color: Colors.black87),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          title,
-          style: const TextStyle(fontSize: 14),
-        ),
-      ],
+          const SizedBox(height: 8),
+          Text(
+            title,
+            style: const TextStyle(fontSize: 14),
+          ),
+        ],
+      ),
     );
   }
 

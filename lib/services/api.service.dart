@@ -6,7 +6,7 @@ class AuthService {
   final String baseUrl;
   final storage = FlutterSecureStorage();
   
-  AuthService({this.baseUrl = 'http://10.0.2.2:8000'});
+  AuthService({this.baseUrl = 'http://192.168.21.4:8000'});
   
   // Register new user
   Future<Map<String, dynamic>> register({

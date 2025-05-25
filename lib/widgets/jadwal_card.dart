@@ -1,5 +1,9 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mobile_mis_mahasiswa/widgets/custom_navbar.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class JadwalCardPage extends StatefulWidget {
   const JadwalCardPage({super.key});
@@ -12,31 +16,63 @@ class _JadwalCardPageState extends State<JadwalCardPage> {
   String selectedTahun = '2024/2025';
   String selectedSemester = 'Genap';
 
-  final List<Map<String, dynamic>> jadwal = [
-    {
-      'hari': 'Senin',
-      'matkul': [
-        {'nama': 'Kecerdasan Buatan', 'ruang': 'C203', 'jam': '08.00 - 09.40'},
-        {'nama': 'Kecerdasan Buatan', 'ruang': 'C203', 'jam': '08.00 - 09.40'},
-        {'nama': 'Kecerdasan Buatan', 'ruang': 'C203', 'jam': '08.00 - 09.40'},
-      ]
-    },
-    {
-      'hari': 'Selasa',
-      'matkul': [
-        {'nama': 'Kecerdasan Buatan', 'ruang': 'C203', 'jam': '08.00 - 09.40'},
-        {'nama': 'Kecerdasan Buatan', 'ruang': 'C203', 'jam': '08.00 - 09.40'},
-        {'nama': 'Kecerdasan Buatan', 'ruang': 'C203', 'jam': '08.00 - 09.40'},
-      ]
-    },
-    {
-      'hari': 'Rabu',
-      'matkul': [
-        {'nama': 'Kecerdasan Buatan', 'ruang': 'C203', 'jam': '08.00 - 09.40'},
-        {'nama': 'Kecerdasan Buatan', 'ruang': 'C203', 'jam': '08.00 - 09.40'},
-      ]
-    },
-  ];
+  Map<String, dynamic> jadwal = {};
+  bool isLoading = true;
+  String? errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchJadwal();
+  }
+
+  Future<void> fetchJadwal() async {
+    setState(() {
+      isLoading = true;
+      errorMessage = null;
+    });
+
+    try {
+      // final prefs = await SharedPreferences.getInstance();
+      // final token = prefs.getString('token');
+
+       final storage = FlutterSecureStorage();
+       final token = await storage.read(key: 'auth_token');
+
+      if (token == null) {
+        setState(() {
+          errorMessage = 'Token tidak ditemukan. Silakan login ulang.';
+          isLoading = false;
+        });
+        return;
+      }
+
+      final response = await http.get(
+        Uri.parse('http://104.214.168.47/api/mahasiswa/jadwal'),
+        headers: {
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        setState(() {
+          jadwal = Map<String, dynamic>.from(data['jadwal'] ?? {});
+          isLoading = false;
+        });
+      } else {
+        setState(() {
+          errorMessage = 'Gagal memuat data jadwal.';
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        errorMessage = 'Terjadi kesalahan: $e';
+        isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -106,57 +142,77 @@ class _JadwalCardPageState extends State<JadwalCardPage> {
             ),
             const SizedBox(height: 16),
 
-            // Daftar Jadwal
-            Expanded(
-              child: ListView.builder(
-                itemCount: jadwal.length,
-                itemBuilder: (context, index) {
-                  final hari = jadwal[index];
-                  return Card(
-                    shape: RoundedRectangleBorder(
-                      side: const BorderSide(color: Colors.black),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    margin: const EdgeInsets.symmetric(vertical: 8),
-                    child: Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Text(
-                            hari['hari'],
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                              color: Colors.black,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          ...hari['matkul'].map<Widget>((matkul) {
-                            return Container(
-                              margin: const EdgeInsets.symmetric(vertical: 4),
-                              padding: const EdgeInsets.symmetric(
-                                  vertical: 8, horizontal: 12),
-                              color: Colors.grey[200],
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(matkul['nama'],
-                                      style: const TextStyle(
-                                          fontWeight: FontWeight.bold)),
-                                  Text('${matkul['ruang']}'),
-                                  Text(matkul['jam']),
-                                ],
-                              ),
-                            );
-                          }).toList(),
-                        ],
+            // Konten jadwal
+            if (isLoading)
+              const Expanded(child: Center(child: CircularProgressIndicator()))
+            else if (errorMessage != null)
+              Expanded(
+                child: Center(
+                  child: Text(
+                    errorMessage!,
+                    style: const TextStyle(color: Colors.red),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              )
+            else if (jadwal.isEmpty)
+              const Expanded(
+                child: Center(child: Text("Tidak ada data jadwal tersedia.")),
+              )
+            else
+              Expanded(
+                child: ListView(
+                  children: jadwal.entries.map((entry) {
+                    final hari = entry.key;
+                    final List<dynamic> matkulList = entry.value;
+
+                    return Card(
+                      shape: RoundedRectangleBorder(
+                        side: const BorderSide(color: Colors.black),
+                        borderRadius: BorderRadius.circular(8),
                       ),
-                    ),
-                  );
-                },
+                      margin: const EdgeInsets.symmetric(vertical: 8),
+                      child: Padding(
+                        padding: const EdgeInsets.all(8),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Text(
+                              hari,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                                color: Colors.black,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            ...matkulList.map((matkul) {
+                              return Container(
+                                margin: const EdgeInsets.symmetric(vertical: 4),
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 8, horizontal: 12),
+                                color: Colors.grey[200],
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(matkul['mata_kuliah'] ?? '',
+                                        style: const TextStyle(
+                                            fontWeight: FontWeight.bold)),
+                                    Text('Kode: ${matkul['kode']}'),
+                                    Text('Ruang: ${matkul['ruang']}'),
+                                    Text('Jam: ${matkul['waktu']}'),
+                                    Text('Dosen: ${matkul['dosen']}'),
+                                  ],
+                                ),
+                              );
+                            }).toList(),
+                          ],
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
               ),
-            )
           ],
         ),
       ),

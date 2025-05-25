@@ -6,7 +6,7 @@ class AuthService {
   final String baseUrl;
   final storage = FlutterSecureStorage();
   
-  AuthService({this.baseUrl = 'http://192.168.21.4:8000'});
+  AuthService({this.baseUrl = 'http://104.214.168.47/api/'});
   
   Future<Map<String, dynamic>> register({
     required String name,
@@ -15,7 +15,7 @@ class AuthService {
     required String passwordConfirmation,
   }) async {
     final response = await http.post(
-      Uri.parse('$baseUrl/api/register'),
+      Uri.parse('$baseUrl/register'),
       headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
       body: jsonEncode({
         'name': name,
@@ -36,32 +36,53 @@ class AuthService {
       throw Exception(error['message'] ?? 'Registration failed');
     }
   }
-  
+
+  String determineRole(String email) {
+  if (email.endsWith('@student.pens.ac.id')) {
+    return 'mahasiswa';
+  } else if (email.endsWith('@dosen.pens.ac.id')) {
+    return 'dosen';
+  } else {
+    return 'unknown';
+  }
+}
+
   // Login user
   Future<Map<String, dynamic>> login({
-    required String email, 
-    required String password
-  }) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/api/login'),
-      headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
-      body: jsonEncode({
-        'email': email,
-        'password': password,
-      }),
-    );
-    
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      if (data['token'] != null) {
-        await storage.write(key: 'auth_token', value: data['token']);
-      }
-      return data;
-    } else {
-      final error = jsonDecode(response.body);
-      throw Exception(error['message'] ?? 'Login failed');
+  required String email, 
+  required String password
+}) async {
+  final response = await http.post(
+    Uri.parse('$baseUrl/login'),
+    headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
+    body: jsonEncode({
+      'email': email,
+      'password': password,
+    }),
+  );
+  
+  if (response.statusCode == 200) {
+    final data = jsonDecode(response.body);
+    if (data['token'] != null) {
+      await storage.write(key: 'auth_token', value: data['token']);
+      
+      // Menentukan role berdasarkan email dan menyimpannya
+      final role = determineRole(email);
+      await storage.write(key: 'user_role', value: role);
+      
+      // Tambahkan role ke data response
+      data['role'] = role;
     }
+    return data;
+  } else {
+    final error = jsonDecode(response.body);
+    throw Exception(error['message'] ?? 'Login failed');
   }
+}
+
+  Future<String?> getUserRole() async {
+  return await storage.read(key: 'user_role');
+}
   
   // Logout user
   Future<void> logout() async {
@@ -70,7 +91,7 @@ class AuthService {
     if (token != null) {
       try {
         await http.post(
-          Uri.parse('$baseUrl/api/logout'),
+          Uri.parse('$baseUrl/logout'),
           headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
@@ -94,7 +115,7 @@ class AuthService {
     }
     
     final response = await http.get(
-      Uri.parse('$baseUrl/api/user'),
+      Uri.parse('$baseUrl/user'),
       headers: {
         'Accept': 'application/json',
         'Authorization': 'Bearer $token',

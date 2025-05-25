@@ -1,41 +1,24 @@
-// lib/providers/auth_provider.dart
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
 
 class AuthProvider extends ChangeNotifier {
   final AuthService _authService = AuthService();
-  bool _isLoading = false;
   bool _isAuthenticated = false;
+  bool _isLoading = false;
   String? _error;
   Map<String, dynamic>? _user;
-  
-  bool get isLoading => _isLoading;
+  String? _role;
+
   bool get isAuthenticated => _isAuthenticated;
+  bool get isLoading => _isLoading;
   String? get error => _error;
   Map<String, dynamic>? get user => _user;
-  
-  AuthProvider() {
-    _checkLoginStatus();
-  }
-  
-  Future<void> _checkLoginStatus() async {
-    _isLoading = true;
-    notifyListeners();
-    
-    try {
-      _isAuthenticated = await _authService.isLoggedIn();
-      if (_isAuthenticated) {
-        _user = await _authService.getUser();
-      }
-    } catch (e) {
-      _error = e.toString();
-      _isAuthenticated = false;
-    } finally {
-      _isLoading = false;
-      notifyListeners();
-    }
-  }
-  
+  String? get role => _role;
+
+  // Tambahkan getter untuk mengecek role
+  bool get isMahasiswa => _role == 'mahasiswa';
+  bool get isDosen => _role == 'dosen';
+
   Future<bool> login(String email, String password) async {
     _isLoading = true;
     _error = null;
@@ -49,6 +32,14 @@ class AuthProvider extends ChangeNotifier {
       
       _isAuthenticated = true;
       _user = await _authService.getUser();
+      _role = _user?['role'];
+      if (_role != 'mahasiswa') {
+      _error = 'Aplikasi ini hanya untuk mahasiswa';
+      _isAuthenticated = false;
+      _user = null;
+      return false;
+    }
+
       return true;
     } catch (e) {
       _error = e.toString();

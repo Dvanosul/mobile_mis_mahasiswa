@@ -1,9 +1,6 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mobile_mis_mahasiswa/widgets/custom_navbar.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:mobile_mis_mahasiswa/services/jadwal_service.dart';
 
 class JadwalCardPage extends StatefulWidget {
   const JadwalCardPage({super.key});
@@ -13,10 +10,9 @@ class JadwalCardPage extends StatefulWidget {
 }
 
 class _JadwalCardPageState extends State<JadwalCardPage> {
-  String selectedTahun = '2024/2025';
-  String selectedSemester = 'Genap';
-
-  Map<String, dynamic> jadwal = {};
+  final JadwalService _jadwalService = JadwalService();
+  
+  Map<String, List<dynamic>> jadwal = {};
   bool isLoading = true;
   String? errorMessage;
 
@@ -33,45 +29,61 @@ class _JadwalCardPageState extends State<JadwalCardPage> {
     });
 
     try {
-      // final prefs = await SharedPreferences.getInstance();
-      // final token = prefs.getString('token');
-
-       final storage = FlutterSecureStorage();
-       final token = await storage.read(key: 'auth_token');
-
-      if (token == null) {
-        setState(() {
-          errorMessage = 'Token tidak ditemukan. Silakan login ulang.';
-          isLoading = false;
-        });
-        return;
-      }
-
-      final response = await http.get(
-        Uri.parse('http://104.214.168.47/api/mahasiswa/jadwal'),
-        headers: {
-          'Authorization': 'Bearer $token',
-        },
-      );
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        setState(() {
-          jadwal = Map<String, dynamic>.from(data['jadwal'] ?? {});
-          isLoading = false;
-        });
-      } else {
-        setState(() {
-          errorMessage = 'Gagal memuat data jadwal.';
-          isLoading = false;
-        });
-      }
+      final dynamic response = await _jadwalService.getJadwal();
+      
+      setState(() {
+        if (response is List) {
+          jadwal = _groupJadwalByDay(response as List);
+        } else if (response is Map<String, dynamic>) {
+          if (response.containsKey('jadwal')) {
+            final dynamic jadwalData = response['jadwal'];
+            
+            if (jadwalData is List) {
+              jadwal = _groupJadwalByDay(jadwalData as List);
+            } else if (jadwalData is Map) {
+              final result = <String, List<dynamic>>{};
+              jadwalData.forEach((key, value) {
+                if (key is String && value is List) {
+                  result[key] = value;
+                }
+              });
+              jadwal = result;
+            } else {
+              jadwal = {};
+            }
+          } else {
+            jadwal = {};
+          }
+        } else {
+          jadwal = {};
+        }
+        
+        isLoading = false;
+      });
     } catch (e) {
       setState(() {
-        errorMessage = 'Terjadi kesalahan: $e';
+        errorMessage = 'Terjadi kesalahan saat memuat jadwal';
         isLoading = false;
       });
     }
+  }
+  
+  Map<String, List<dynamic>> _groupJadwalByDay(List<dynamic> jadwalList) {
+    final Map<String, List<dynamic>> grouped = {};
+    
+    for (var item in jadwalList) {
+      if (item is! Map) continue;
+      
+      final String hari = item['hari']?.toString() ?? 'Tidak diketahui';
+      
+      if (!grouped.containsKey(hari)) {
+        grouped[hari] = [];
+      }
+      
+      grouped[hari]!.add(item);
+    }
+    
+    return grouped;
   }
 
   @override
@@ -100,48 +112,6 @@ class _JadwalCardPageState extends State<JadwalCardPage> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            // Dropdown Tahun & Semester
-            Row(
-              children: [
-                Expanded(
-                  child: DropdownButtonFormField<String>(
-                    value: selectedTahun,
-                    decoration: const InputDecoration(labelText: 'Tahun Ajaran'),
-                    items: ['2023/2024', '2024/2025', '2025/2026']
-                        .map((tahun) => DropdownMenuItem(
-                              value: tahun,
-                              child: Text(tahun),
-                            ))
-                        .toList(),
-                    onChanged: (value) {
-                      setState(() {
-                        selectedTahun = value!;
-                      });
-                    },
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: DropdownButtonFormField<String>(
-                    value: selectedSemester,
-                    decoration: const InputDecoration(labelText: 'Semester'),
-                    items: ['Ganjil', 'Genap']
-                        .map((sem) => DropdownMenuItem(
-                              value: sem,
-                              child: Text(sem),
-                            ))
-                        .toList(),
-                    onChanged: (value) {
-                      setState(() {
-                        selectedSemester = value!;
-                      });
-                    },
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-
             // Konten jadwal
             if (isLoading)
               const Expanded(child: Center(child: CircularProgressIndicator()))

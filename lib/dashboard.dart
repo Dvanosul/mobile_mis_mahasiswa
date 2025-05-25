@@ -2,18 +2,47 @@ import 'package:flutter/material.dart';
 import 'package:mobile_mis_mahasiswa/widgets/frs_form.dart'; 
 import 'package:mobile_mis_mahasiswa/widgets/jadwal_card.dart'; 
 import 'package:mobile_mis_mahasiswa/widgets/nilai_card.dart'; 
-import 'package:mobile_mis_mahasiswa/widgets/custom_navbar.dart'; 
+import 'package:mobile_mis_mahasiswa/widgets/custom_navbar.dart';
+import 'package:provider/provider.dart';
+import 'package:mobile_mis_mahasiswa/providers/auth_providers.dart';
 
-class DashboardPage extends StatelessWidget {
+class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
 
   @override
+  State<DashboardPage> createState() => _DashboardPageState();
+}
+
+class _DashboardPageState extends State<DashboardPage> {
+  @override
   Widget build(BuildContext context) {
+    final authProvider = Provider.of<AuthProvider>(context);
+    final user = authProvider.user;
+    
     return Scaffold(
       backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        title: const Text(
+          'Dashboard',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF1B2B50),
+          ),
+        ),
+        centerTitle: true,
+        actions: const [
+          Padding(
+            padding: EdgeInsets.only(right: 16.0),
+            child: Icon(Icons.info_outline, color: Colors.black),
+          ),
+        ],
+      ),
       bottomNavigationBar: CustomNavBar(currentIndex: 0, context: context), 
       body: SafeArea(
         child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
           padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -22,31 +51,66 @@ class DashboardPage extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFD7D4FB),
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF8F98F8), Color(0xFFD7D4FB)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
                   borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
                 child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const CircleAvatar(
-                      radius: 6,
-                      backgroundColor: Colors.blue,
+                    Container(
+                      width: 50,
+                      height: 50,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(25),
+                      ),
+                      child: const Icon(
+                        Icons.person,
+                        color: Color(0xFF8F98F8),
+                        size: 30,
+                      ),
                     ),
-                    const SizedBox(width: 12),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
-                        Text(
-                          'Selamat Datang',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18,
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Selamat Datang',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                              color: Colors.white,
+                            ),
                           ),
-                        ),
-                        SizedBox(height: 4),
-                        Text('M Ghazali'),
-                        Text('3123500033'),
-                      ],
+                          const SizedBox(height: 4),
+                          Text(
+                            user?['name'] ?? 'Mahasiswa',
+                            style: const TextStyle(
+                              fontSize: 16, 
+                              fontWeight: FontWeight.w500,
+                              color: Colors.white,
+                            ),
+                          ),
+                          Text(
+                            user?['nrp'] ?? '-',
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
@@ -55,36 +119,55 @@ class DashboardPage extends StatelessWidget {
 
               // Features
               const Text(
-                'Features',
+                'Fitur Akademik',
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: 18,
                   fontWeight: FontWeight.bold,
+                  color: Color(0xFF1B2B50),
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 16),
+              
+              // Main Features Row - Only FRS, Jadwal, Nilai
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  _featureCard(context, Icons.edit_note, 'FRS', const FrsPage()),
-                  _featureCard(context, Icons.calendar_month, 'Jadwal Kuliah', const JadwalCardPage()),
-                  _featureCard(context, Icons.bar_chart, 'Nilai', const NilaiCardPage()),
+                  Expanded(
+                    child: _featureCard(context, Icons.edit_note, 'FRS', const FrsPage()),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _featureCard(context, Icons.calendar_month, 'Jadwal', const JadwalCardPage()),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _featureCard(context, Icons.bar_chart, 'Nilai', const NilaiCardPage()),
+                  ),
                 ],
               ),
-
-              const SizedBox(height: 32),
-
-              // Announcements
-              const Text(
-                'Announcements',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
+              
+              // Additional info or content can be added here
+              const SizedBox(height: 40),
+              Center(
+                child: Text(
+                  'Sistem Informasi Akademik Mahasiswa',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey[600],
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ),
-              const SizedBox(height: 12),
-              _announcementCard('Judul Berita', 'Isi Berita'),
-              _announcementCard('Judul Berita', 'Isi Berita'),
-              _announcementCard('Judul Berita', 'Isi Berita'),
+              const SizedBox(height: 8),
+              Center(
+                child: Text(
+                  'Versi 1.0',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey[500],
+                  ),
+                ),
+              ),
             ],
           ),
         ),
@@ -100,56 +183,41 @@ class DashboardPage extends StatelessWidget {
           MaterialPageRoute(builder: (context) => destinationPage),
         );
       },
-      child: Column(
-        children: [
-          Container(
-            width: 80,
-            height: 80,
-            decoration: BoxDecoration(
-              color: Colors.grey.shade300,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(icon, size: 32, color: Colors.black87),
+      child: Card(
+        elevation: 3,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 20),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                width: 60,
+                height: 60,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFD7D4FB),
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                child: Icon(
+                  icon,
+                  size: 30,
+                  color: const Color(0xFF8F98F8),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF1B2B50),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 8),
-          Text(
-            title,
-            style: const TextStyle(fontSize: 14),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _announcementCard(String title, String content) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 6,
-            offset: Offset(0, 2),
-          )
-        ],
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 16,
-              color: Color(0xFF1B2B50),
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(content),
-        ],
+        ),
       ),
     );
   }

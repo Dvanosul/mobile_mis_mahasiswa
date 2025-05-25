@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:mobile_mis_mahasiswa/providers/auth_providers.dart';
-import '../services/auth_service.dart';
+import 'package:mobile_mis_mahasiswa/services/auth_service.dart';
 import 'dashboard.dart';
 
 class LoginPage extends StatefulWidget {

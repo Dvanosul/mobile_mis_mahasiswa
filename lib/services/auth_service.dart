@@ -6,7 +6,7 @@ class AuthService {
   final String baseUrl;
   final storage = FlutterSecureStorage();
   
-  AuthService({this.baseUrl = 'http://104.214.168.47/api/'});
+  AuthService({this.baseUrl = 'http://104.214.168.47/api'});
   
   Future<Map<String, dynamic>> register({
     required String name,

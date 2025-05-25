@@ -32,17 +32,43 @@ class _LoginPageState extends State<LoginPage> {
     });
 
     try {
-      final authService = AuthService();
-      await authService.login(
-        email: _emailController.text.trim(),
-        password: _passwordController.text,
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final success = await authProvider.login(
+        _emailController.text.trim(),
+        _passwordController.text,
       );
 
       if (mounted) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const DashboardPage()),
-        );
+        if (success) {
+          // Cek pesan error dari provider
+          if (authProvider.error != null) {
+            setState(() {
+              _errorMessage = authProvider.error;
+            });
+            return;
+          }
+          
+          // Cek role dan arahkan ke halaman yang sesuai
+          if (authProvider.isMahasiswa) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const DashboardPage()),
+            );
+          } else if (authProvider.isDosen) {
+            // Tambahkan navigasi ke halaman dosen jika ada
+            setState(() {
+              _errorMessage = "Aplikasi ini hanya untuk mahasiswa";
+            });
+          } else {
+            setState(() {
+              _errorMessage = "Role pengguna tidak valid";
+            });
+          }
+        } else {
+          setState(() {
+            _errorMessage = authProvider.error ?? "Login gagal";
+          });
+        }
       }
     } catch (e) {
       setState(() {

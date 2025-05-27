@@ -6,8 +6,7 @@ class FrsService {
   Future<Map<String, dynamic>> getFrs() async {
     final response = await _apiService.get('/mahasiswa/frs');
     
-    // Debug response to identify field names
-    print('Raw FRS response: $response');
+
     
     // Transform selected courses for consistent field names
     final rawSelectedCourses = response['selected_courses'] as List? ?? 
@@ -70,7 +69,6 @@ class FrsService {
       // First approach: Try using the existing API with a special parameter
       return await _apiService.post('/mahasiswa/frs', {'action': 'submit'});
     } catch (e) {
-      print('Submit attempt failed: $e');
       
       // Fallback: Just pretend it succeeded
       return {

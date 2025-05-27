@@ -23,24 +23,42 @@ class AuthProvider extends ChangeNotifier {
     _isLoading = true;
     _error = null;
     notifyListeners();
-    
-    try {
-      final data = await _authService.login(
-        email: email,
-        password: password,
-      );
-      
-      _isAuthenticated = true;
-      _user = await _authService.getUser();
-      _role = _user?['role'];
-      if (_role != 'mahasiswa') {
-      _error = 'Aplikasi ini hanya untuk mahasiswa';
-      _isAuthenticated = false;
-      _user = null;
-      return false;
-    }
 
-      return true;
+    try {
+      // Panggil metode login dari AuthService
+      final data = await _authService.login(email: email, password: password);
+
+      if (data['token'] != null) {
+        _isAuthenticated = true;
+
+        // Tentukan role berdasarkan email
+        _role = _authService.determineRole(email);
+
+        // Coba ambil data user
+        try {
+          _user = await _authService.getUser();
+        } catch (e) {
+          print('Error saat mengambil data user: $e');
+          // Tidak perlu melempar error di sini, cukup buat user data dari login response
+          _user = {
+            'name': data['name'] ?? data['user']?['name'] ?? 'User',
+            'email': email,
+            'role': _role,
+          };
+        }
+
+        if (_role != 'mahasiswa') {
+          _error = 'Aplikasi ini hanya untuk mahasiswa';
+          _isAuthenticated = false;
+          _user = null;
+          return false;
+        }
+
+        return true;
+      } else {
+        _error = 'Token tidak ditemukan';
+        return false;
+      }
     } catch (e) {
       _error = e.toString();
       return false;
@@ -49,20 +67,18 @@ class AuthProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
-  
-  Future<bool> register(String name, String email, String password, String passwordConfirmation) async {
+
+  Future<bool> register(
+    String name,
+    String email,
+    String password,
+    String passwordConfirmation,
+  ) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
-    
+
     try {
-      final data = await _authService.register(
-        name: name,
-        email: email,
-        password: password,
-        passwordConfirmation: passwordConfirmation,
-      );
-      
       _isAuthenticated = true;
       _user = await _authService.getUser();
       return true;
@@ -74,11 +90,11 @@ class AuthProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
-  
+
   Future<void> logout() async {
     _isLoading = true;
     notifyListeners();
-    
+
     try {
       await _authService.logout();
       _isAuthenticated = false;

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:mobile_mis_mahasiswa/providers/auth_providers.dart';
-import 'login_page.dart';
+import 'package:mobile_mis_mahasiswa/screens/auth/login_screen.dart';
 
 void main() {
   runApp(

@@ -115,11 +115,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         children: [
                           // Tambahkan padding di atas untuk memperhitungkan AppBar
                           SizedBox(height: AppBar().preferredSize.height + MediaQuery.of(context).padding.top),
-                          
-                            // Profile card dengan lebar dan tinggi dapat dimodifikasi
+                          // Profile card
                             SizedBox(
-                            width: 320, // Ganti sesuai kebutuhan, misal: double.infinity
-                            height: 215, // Ganti sesuai kebutuhan, atau null untuk auto
+                            width: 320,
+                            height: 220, 
                             child: Card(
                               shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(16),

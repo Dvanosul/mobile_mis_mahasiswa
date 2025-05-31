@@ -1,5 +1,3 @@
-// ignore_for_file: use_build_context_synchronously, deprecated_member_use
-
 import 'package:flutter/material.dart';
 import 'package:mobile_mis_mahasiswa/widgets/custom_navbar.dart';
 import 'package:mobile_mis_mahasiswa/services/frs_service.dart';
@@ -265,7 +263,20 @@ class _FrsPageState extends State<FrsPage> {
                       children: [
                         // Student Information Card
                         _buildStudentInfoCard(user),
-                        const SizedBox(height: 24),
+                        const SizedBox(height: 16), 
+                        Row(
+                          children: [
+                            _buildStatusIndicator('Menunggu', Colors.orange, 
+                                _selectedCourses.where((c) => (c['status'] ?? 'pending').toLowerCase() == 'pending').length),
+                            const SizedBox(width: 8),
+                            _buildStatusIndicator('Disetujui', Colors.green, 
+                                _selectedCourses.where((c) => (c['status'] ?? '').toLowerCase() == 'approved').length),
+                            const SizedBox(width: 8),
+                            _buildStatusIndicator('Ditolak', Colors.red, 
+                                _selectedCourses.where((c) => (c['status'] ?? '').toLowerCase() == 'rejected').length),
+                          ],
+                        ),
+                        const SizedBox(height: 16), // Tambahkan space setelah status summary
 
                         // SKS Counter
                         Container(
@@ -466,58 +477,107 @@ class _FrsPageState extends State<FrsPage> {
   }
 
   Widget _buildSelectedCourseCard(Map<String, dynamic> course) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: const BorderSide(color: Color(0xFF8F98F8), width: 2),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Course Info
-            Expanded(
-              child: Column(
+      final String status = (course['status'] ?? 'pending').toLowerCase();
+      final Color statusColor = {
+        'pending': Colors.orange,
+        'approved': Colors.green,
+        'rejected': Colors.red,
+      }[status] ?? Colors.orange;
+      
+      final IconData statusIcon = {
+        'pending': Icons.hourglass_empty,
+        'approved': Icons.check_circle,
+        'rejected': Icons.cancel,
+      }[status] ?? Icons.hourglass_empty;
+      
+      final String statusText = course['status_text'] ?? {
+        'pending': 'Menunggu Persetujuan',
+        'approved': 'Disetujui',
+        'rejected': 'Ditolak',
+      }[status] ?? 'Menunggu Persetujuan';
+
+      return Card(
+        margin: const EdgeInsets.only(bottom: 12),
+        elevation: 2,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: BorderSide(color: statusColor, width: 2),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Status indicator
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                decoration: BoxDecoration(
+                  color: statusColor.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(statusIcon, size: 16, color: statusColor),
+                    const SizedBox(width: 4),
+                    Text(
+                      statusText,
+                      style: TextStyle(
+                        color: statusColor,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 12),
+              
+              // Course info
+              Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    // Updated to include nama_matakuliah in the keys to check
-                    '${course['kode_mk'] ?? course['kode'] ?? course['code'] ?? '-'} - ${course['nama_matakuliah'] ?? course['nama_mk'] ?? course['nama'] ?? course['name'] ?? '-'}',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
+                  // Course Info
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '${course['kode_mk'] ?? course['kode'] ?? course['code'] ?? '-'} - ${course['nama_matakuliah'] ?? course['nama_mk'] ?? course['nama'] ?? course['name'] ?? '-'}',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        _courseInfoItem(
+                          Icons.person,
+                          'Dosen: ${course['nama_dosen'] ?? course['dosen'] ?? course['lecturer'] ?? '-'}',
+                        ),
+                        _courseInfoItem(
+                          Icons.calendar_today,
+                          '${course['jadwal'] ?? course['schedule'] ?? '-'}',
+                        ),
+                        _courseInfoItem(
+                          Icons.book,
+                          'SKS: ${course['sks']?.toString() ?? '0'}',
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  _courseInfoItem(
-                    Icons.person,
-                    'Dosen: ${course['nama_dosen'] ?? course['dosen'] ?? course['lecturer'] ?? '-'}',
-                  ),
-                  _courseInfoItem(
-                    Icons.calendar_today,
-                    '${course['jadwal'] ?? course['schedule'] ?? '-'}',
-                  ),
-                  _courseInfoItem(
-                    Icons.book,
-                    'SKS: ${course['sks']?.toString() ?? '0'}',
-                  ),
+                  
+                  // Remove button (hanya jika status pending)
+                  if (status == 'pending')
+                    IconButton(
+                      onPressed: _isSubmitting ? null : () => _removeCourse(course['id']),
+                      icon: const Icon(Icons.delete, color: Colors.red),
+                    ),
                 ],
               ),
-            ),
-            // Remove button
-            IconButton(
-              onPressed:
-                  _isSubmitting ? null : () => _removeCourse(course['id']),
-              icon: const Icon(Icons.delete, color: Colors.red),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
-    );
-  }
+      );
+    }
 
   Widget _buildAvailableCourseCard(
     Map<String, dynamic> course,
@@ -603,4 +663,35 @@ class _FrsPageState extends State<FrsPage> {
       ),
     );
   }
+  
+  Widget _buildStatusIndicator(String label, Color color, int count) {
+      return Expanded(
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.2),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Column(
+            children: [
+              Text(
+                count.toString(),
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                  color: color,
+                ),
+              ),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: color,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
 }

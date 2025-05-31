@@ -4,31 +4,41 @@ class FrsService {
   final BaseApiService _apiService = BaseApiService();
 
   Future<Map<String, dynamic>> getFrs() async {
-    final response = await _apiService.get('/mahasiswa/frs');
-    
-
-    
-    // Transform selected courses for consistent field names
-    final rawSelectedCourses = response['selected_courses'] as List? ?? 
-                              response['frs_submissions'] as List? ?? [];
-    
-    // Create a properly typed list
-    List<Map<String, dynamic>> selectedCourses = [];
-    for (var course in rawSelectedCourses) {
-      selectedCourses.add({
-        'id': course['id'] ?? 0,
-        'frs_id': course['id'] ?? 0,  // Store FRS ID for deletion
-        'matakuliah_id': course['matakuliah_id'] ?? course['mata_kuliah_id'] ?? 0,
-        'nama': course['nama_matakuliah'] ?? course['nama_mk'] ?? course['nama'] ?? 
-              course['name'] ?? course['matakuliah']?['nama'] ?? '-',
-        'kode': course['kode_mk'] ?? course['kode'] ?? course['code'] ?? 
-              course['matakuliah']?['kode'] ?? '-',
-        'sks': course['sks'] ?? course['matakuliah']?['sks'] ?? 0,
-        'dosen': course['nama_dosen'] ?? course['dosen'] ?? course['lecturer'] ?? '-',
-        'jadwal': course['jadwal'] ?? course['schedule'] ?? 
-                '${course['hari'] ?? ''} ${course['waktu'] ?? ''}',
-      });
-    }
+      final response = await _apiService.get('/mahasiswa/frs');
+      final rawSelectedCourses = response['selected_courses'] as List? ?? 
+                                response['frs_submissions'] as List? ?? [];
+      
+      List<Map<String, dynamic>> selectedCourses = [];
+      for (var course in rawSelectedCourses) {
+        final status = (course['status'] ?? 'pending').toLowerCase();
+        final String statusText;
+        switch (status) {
+          case 'approved':
+            statusText = 'Disetujui';
+            break;
+          case 'rejected':
+            statusText = 'Ditolak';
+            break;
+          default:
+            statusText = 'Menunggu Persetujuan';
+        }
+        
+        selectedCourses.add({
+          'id': course['id'] ?? 0,
+          'frs_id': course['id'] ?? 0,  // Store FRS ID for deletion
+          'matakuliah_id': course['matakuliah_id'] ?? course['mata_kuliah_id'] ?? 0,
+          'nama': course['nama_matakuliah'] ?? course['nama_mk'] ?? course['nama'] ?? 
+                course['name'] ?? course['matakuliah']?['nama'] ?? '-',
+          'kode': course['kode_mk'] ?? course['kode'] ?? course['code'] ?? 
+                course['matakuliah']?['kode'] ?? '-',
+          'sks': course['sks'] ?? course['matakuliah']?['sks'] ?? 0,
+          'dosen': course['nama_dosen'] ?? course['dosen'] ?? course['lecturer'] ?? '-',
+          'jadwal': course['jadwal'] ?? course['schedule'] ?? 
+                  '${course['hari'] ?? ''} ${course['waktu'] ?? ''}',
+          'status': status,  // Tambahkan status
+          'status_text': statusText,  // Tambahkan teks status
+        });
+      }
     
     // Do the same for available courses
     final rawAvailableCourses = response['available_courses'] as List? ?? [];

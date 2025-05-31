@@ -88,6 +88,8 @@ class _JadwalCardPageState extends State<JadwalCardPage> {
 
   @override
   Widget build(BuildContext context) {
+    final Color primaryColor = const Color(0xFF8F98F8);
+
     return Scaffold(
       bottomNavigationBar: CustomNavBar(currentIndex: 2, context: context),
       appBar: AppBar(
@@ -138,54 +140,78 @@ class _JadwalCardPageState extends State<JadwalCardPage> {
                         final hari = entry.key;
                         final List<dynamic> matkulList = entry.value;
 
-                        return Card(
-                          shape: RoundedRectangleBorder(
-                            side: const BorderSide(color: Colors.black),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          margin: const EdgeInsets.symmetric(vertical: 8),
-                          child: Padding(
-                            padding: const EdgeInsets.all(8),
+                        return SizedBox(
+                          width: double.infinity,
+                          child: Card(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            elevation: 4,
+                            margin: const EdgeInsets.symmetric(vertical: 8),
                             child: Column(
+                              mainAxisSize: MainAxisSize.min,
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
-                                Text(
-                                  hari,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
-                                    color: Colors.black,
+                                Container(
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: primaryColor,
+                                    borderRadius: const BorderRadius.only(
+                                      topLeft: Radius.circular(12),
+                                      topRight: Radius.circular(12),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    hari,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                      color: Colors.white,
+                                    ),
                                   ),
                                 ),
-                                const SizedBox(height: 8),
-                                ...matkulList.map((matkul) {
-                                  return Container(
-                                    margin: const EdgeInsets.symmetric(
-                                      vertical: 4,
-                                    ),
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 8,
-                                      horizontal: 12,
-                                    ),
-                                    color: Colors.grey[200],
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          matkul['mata_kuliah'] ?? '',
-                                          style: const TextStyle(
-                                            fontWeight: FontWeight.bold,
+                                Padding(
+                                  padding: const EdgeInsets.all(12),
+                                  child: Column(
+                                    children: matkulList.map((matkul) {
+                                      return Container(
+                                        width: double.infinity,
+                                        margin: const EdgeInsets.symmetric(
+                                          vertical: 6,
+                                        ),
+                                        padding: const EdgeInsets.symmetric(
+                                          vertical: 12,
+                                          horizontal: 12,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: Colors.grey[100],
+                                          borderRadius: BorderRadius.circular(8),
+                                          border: Border.all(
+                                            color: primaryColor.withOpacity(0.3),
                                           ),
                                         ),
-                                        Text('Kode: ${matkul['kode']}'),
-                                        Text('Ruang: ${matkul['ruang']}'),
-                                        Text('Jam: ${matkul['waktu']}'),
-                                        Text('Dosen: ${matkul['dosen']}'),
-                                      ],
-                                    ),
-                                  );
-                                }),
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              matkul['mata_kuliah'] ?? '',
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 15,
+                                                color: primaryColor,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 4),
+                                            Text('Kode: ${matkul['kode']}'),
+                                            Text('Ruang: ${matkul['ruang']}'),
+                                            Text('Jam: ${matkul['waktu']}'),
+                                            Text('Dosen: ${matkul['dosen']}'),
+                                          ],
+                                        ),
+                                      );
+                                    }).toList(),
+                                  ),
+                                ),
                               ],
                             ),
                           ),

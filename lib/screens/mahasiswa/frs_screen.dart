@@ -411,7 +411,7 @@ class _FrsPageState extends State<FrsPage> {
     );
   }
 
-  Widget _buildStudentInfoCard(Map<String, dynamic>? user) {
+ Widget _buildStudentInfoCard(Map<String, dynamic>? user) {
   // Extract student information from frsData
   final studentInfo = _frsData?['student_info'] ?? {};
 
@@ -444,6 +444,7 @@ class _FrsPageState extends State<FrsPage> {
     ),
   );
 }
+
 
   Widget _infoRow(String label, String value) {
     return Padding(
@@ -558,6 +559,10 @@ class _FrsPageState extends State<FrsPage> {
                           Icons.book,
                           'SKS: ${course['sks']?.toString() ?? '0'}',
                         ),
+                        _courseInfoItem(
+                          Icons.school,
+                          'Semester: ${course['semester'] ?? course['smt'] ?? '-'}',
+                        ),
                       ],
                     ),
                   ),
@@ -620,6 +625,10 @@ class _FrsPageState extends State<FrsPage> {
                     _courseInfoItem(
                       Icons.book,
                       'SKS: ${course['sks']?.toString() ?? '0'}',
+                    ),
+                    _courseInfoItem(
+                      Icons.school,
+                      'Semester: ${course['semester'] ?? course['smt'] ?? '-'}',
                     ),
                   ],
                 ),

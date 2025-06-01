@@ -57,6 +57,7 @@ class FrsService {
                   '${course['hari'] ?? ''} ${course['waktu'] ?? ''}',
           'status': status,  // Tambahkan status
           'status_text': statusText,  // Tambahkan teks status
+          'semester': course['semester'] ?? course['smt'] ?? '-',
         });
       }
     
@@ -75,6 +76,7 @@ class FrsService {
         'dosen': course['dosen'] ?? course['nama_dosen'] ?? course['lecturer'] ?? '-',
         'jadwal': course['jadwal'] ?? course['schedule'] ?? 
                 '${course['hari'] ?? ''} ${course['waktu'] ?? ''}',
+        'semester': course['semester'] ?? course['smt'] ?? '-',
       });
     }
     

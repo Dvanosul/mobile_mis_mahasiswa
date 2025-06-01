@@ -1,5 +1,3 @@
-// ignore_for_file: use_build_context_synchronously, use_super_parameters
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:mobile_mis_mahasiswa/providers/auth_providers.dart';

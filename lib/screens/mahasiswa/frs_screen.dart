@@ -412,41 +412,38 @@ class _FrsPageState extends State<FrsPage> {
   }
 
   Widget _buildStudentInfoCard(Map<String, dynamic>? user) {
-    // Extract student information from frsData
-    final studentInfo = _frsData?['student_info'] ?? {};
+  // Extract student information from frsData
+  final studentInfo = _frsData?['student_info'] ?? {};
 
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Informasi Mahasiswa',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 16),
-          // Only include the three requested fields
-          _infoRow('Nama', studentInfo['nama'] ?? user?['name'] ?? '-'),
-          _infoRow(
-            'NRP',
-            studentInfo['nrp'] ?? studentInfo['nim'] ?? user?['nrp'] ?? '-',
-          ),
-          _infoRow('Max SKS', '$_maxCredits'),
-        ],
-      ),
-    );
-  }
+  return Container(
+    padding: const EdgeInsets.all(16),
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(12),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withOpacity(0.1),
+          blurRadius: 8,
+          offset: const Offset(0, 2),
+        ),
+      ],
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Informasi Akademik',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 16),
+        // Modified fields as requested
+        _infoRow('Dosen wali', studentInfo['dosen_wali'] ?? '-'),
+        _infoRow('Kelas', studentInfo['kelas'] ?? '-'),
+        _infoRow('Max SKS', '$_maxCredits'),
+      ],
+    ),
+  );
+}
 
   Widget _infoRow(String label, String value) {
     return Padding(

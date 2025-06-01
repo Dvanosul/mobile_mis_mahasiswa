@@ -5,8 +5,28 @@ class FrsService {
 
   Future<Map<String, dynamic>> getFrs() async {
       final response = await _apiService.get('/mahasiswa/frs');
+      
+      // Dapatkan informasi mahasiswa
+      final studentInfoResponse = await _apiService.get('/mahasiswa/profile');
+      
+      // Buat student_info yang lengkap
+      Map<String, dynamic> studentInfo = response['student_info'] ?? {};
+      
+      // Tambahkan informasi dari profile jika tersedia
+      if (studentInfoResponse != null) {
+        studentInfo['nama'] = studentInfoResponse['name'] ?? studentInfo['nama'] ?? '-';
+        studentInfo['nrp'] = studentInfoResponse['nrp'] ?? studentInfo['nrp'] ?? '-';
+        
+        // Tambahkan informasi kelas
+        if (studentInfoResponse['kelas'] != null) {
+          studentInfo['kelas'] = studentInfoResponse['kelas']['nama'] ?? '-';
+          studentInfo['dosen_wali'] = studentInfoResponse['kelas']['dosen_wali'] ?? '-';
+        }
+      }
+      
       final rawSelectedCourses = response['selected_courses'] as List? ?? 
                                 response['frs_submissions'] as List? ?? [];
+      
       
       List<Map<String, dynamic>> selectedCourses = [];
       for (var course in rawSelectedCourses) {

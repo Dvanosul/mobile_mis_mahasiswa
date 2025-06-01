@@ -1,11 +1,7 @@
 // ignore_for_file: deprecated_member_use
 
 import 'package:flutter/material.dart';
-import 'package:mobile_mis_mahasiswa/screens/mahasiswa/home_screen.dart';
-import 'package:mobile_mis_mahasiswa/screens/mahasiswa/frs_screen.dart';
-import 'package:mobile_mis_mahasiswa/screens/mahasiswa/jadwal_screen.dart';
-import 'package:mobile_mis_mahasiswa/screens/mahasiswa/nilai_screen.dart';
-import 'package:mobile_mis_mahasiswa/screens/mahasiswa/profile_screen.dart';
+import 'package:mobile_mis_mahasiswa/routes.dart';
 
 class CustomNavBar extends StatelessWidget {
   final int currentIndex;
@@ -17,39 +13,40 @@ class CustomNavBar extends StatelessWidget {
     required this.context,
   });
 
-  void _onTap(int index) {
+ void _onTap(int index) {
     if (index == currentIndex) return;
+    final localContext = context;
 
     switch (index) {
       case 0:
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (context) => const DashboardPage()),
+        Navigator.pushNamedAndRemoveUntil(
+          localContext,
+          Routes.home,
           (route) => false,
         );
         break;
       case 1:
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const FrsPage()),
+        Navigator.pushNamed(
+          localContext,
+          Routes.frs,
         );
         break;
       case 2:
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const JadwalCardPage()),
+        Navigator.pushNamed(
+          localContext,
+          Routes.jadwal,
         );
         break;
       case 3:
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const NilaiCardPage()),
+        Navigator.pushNamed(
+          localContext,
+          Routes.nilai,
         );
         break;
       case 4:
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const ProfileScreen()),
+        Navigator.pushNamed(
+          localContext,
+          Routes.profile,
         );
         break;
     }

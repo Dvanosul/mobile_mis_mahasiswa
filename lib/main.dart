@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:mobile_mis_mahasiswa/providers/auth_providers.dart';
 import 'package:mobile_mis_mahasiswa/screens/auth/login_screen.dart';
+import 'package:mobile_mis_mahasiswa/routes.dart';
 
 void main() {
   runApp(
@@ -23,7 +24,11 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const LoginPage(),
+      routes: Routes.getRoutes(),
+      initialRoute: Routes.login,
+      onUnknownRoute: (settings) {
+        return MaterialPageRoute(builder: (_) => const LoginPage());
+      },
     );
   }
 }

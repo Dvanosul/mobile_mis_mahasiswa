@@ -6,7 +6,7 @@ import 'package:mobile_mis_mahasiswa/screens/auth/login_screen.dart';
 import 'package:mobile_mis_mahasiswa/widgets/custom_navbar.dart';
 
 class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({Key? key}) : super(key: key);
+  const ProfileScreen({super.key});
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();

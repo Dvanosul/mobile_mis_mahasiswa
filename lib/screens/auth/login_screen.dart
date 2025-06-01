@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:mobile_mis_mahasiswa/providers/auth_providers.dart';
 import 'package:mobile_mis_mahasiswa/screens/mahasiswa/home_screen.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -19,23 +20,10 @@ class _LoginPageState extends State<LoginPage> {
   bool _isLoading = false;
   String? _errorMessage;
   bool _obscurePassword = true;
-  // late AnimationController _animationController;
-  // late Animation<double> _fadeAnimation;
 
   @override
   void initState() {
     super.initState();
-    // _animationController = AnimationController(
-    //   vsync: this,
-    //   duration: const Duration(milliseconds: 800),
-    // );
-    // _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-    //   CurvedAnimation(
-    //     parent: _animationController,
-    //     curve: Curves.easeInOut,
-    //   ),
-    // );
-    // _animationController.forward();
 
     SystemChrome.setSystemUIOverlayStyle(
       const SystemUiOverlayStyle(
@@ -64,6 +52,18 @@ class _LoginPageState extends State<LoginPage> {
       _isLoading = true;
       _errorMessage = null;
     });
+
+     // Check internet connectivity
+    var connectivityResult = await (Connectivity().checkConnectivity());
+    if (connectivityResult.contains(ConnectivityResult.none)) {
+      if (mounted) {
+        setState(() {
+          _errorMessage = "Tidak ada koneksi internet. Silakan periksa koneksi Anda.";
+          _isLoading = false;
+        });
+      }
+      return;
+    }
 
     try {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
@@ -127,16 +127,9 @@ class _LoginPageState extends State<LoginPage> {
       body: SafeArea(
         child: GestureDetector(
           onTap: () => FocusScope.of(context).unfocus(),
-          child: Container(
+          child: SizedBox(
             width: double.infinity,
             height: double.infinity,
-            decoration: const BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage('assets/images/login_background.png'),
-                fit: BoxFit.cover,
-                opacity: 0.05,
-              ),
-            ),
             child: Padding(
               padding: EdgeInsets.symmetric(
                 horizontal: screenSize.width * 0.08,
@@ -148,12 +141,8 @@ class _LoginPageState extends State<LoginPage> {
                   children: [
                     SizedBox(
                       height: isSmallScreen ? 80 : 100,
-                      child: Image.asset(
-                        'assets/images/logo.png',
-                        errorBuilder: (context, error, stackTrace) =>
-                            const Icon(Icons.school_rounded, size: 80, color: Color(0xFF8F98F8)),
+                      child: Icon(Icons.school_rounded, size: 80, color: Color(0xFF8F98F8)),
                       ),
-                    ),
                     Expanded(
                       child: SingleChildScrollView(
                         physics: const BouncingScrollPhysics(),
@@ -273,20 +262,6 @@ class _LoginPageState extends State<LoginPage> {
                                 errorBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(12),
                                   borderSide: BorderSide(color: Colors.red.shade300),
-                                ),
-                              ),
-                            ),
-                            Align(
-                              alignment: Alignment.centerRight,
-                              child: TextButton(
-                                onPressed: () {},
-                                child: const Text(
-                                  'Lupa Password?',
-                                  style: TextStyle(
-                                    color: Color(0xFF8F98F8),
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500,
-                                  ),
                                 ),
                               ),
                             ),

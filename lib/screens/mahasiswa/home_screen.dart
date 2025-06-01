@@ -25,7 +25,6 @@ class _DashboardPageState extends State<DashboardPage> {
   // Data jadwal dan nilai
   Map<String, List<dynamic>>? _jadwalPerHari;
   List<dynamic> _jadwalHariIni = [];
-  Map<String, dynamic>? _nilaiData;
   double _ipk = 0.0;
 
   @override
@@ -65,7 +64,6 @@ class _DashboardPageState extends State<DashboardPage> {
       // Ambil data nilai
       final nilaiData = await _nilaiService.getNilai();
       setState(() {
-        _nilaiData = nilaiData;
         // Gunakan IPK langsung dari server daripada menghitung ulang
         _ipk = (nilaiData['ip'] as num?)?.toDouble() ?? 0.0;
       });

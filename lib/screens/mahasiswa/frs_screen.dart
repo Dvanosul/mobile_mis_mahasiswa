@@ -40,7 +40,15 @@ class _FrsPageState extends State<FrsPage> {
       final data = await _frsService.getFrs();
       setState(() {
         _frsData = data;
+        
+        // Get the selected courses
         _selectedCourses = data['selected_courses'] ?? [];
+        _selectedCourses.sort((a, b) {
+          int idA = a['id'] is int ? a['id'] : int.tryParse('${a['id']}') ?? 0;
+          int idB = b['id'] is int ? b['id'] : int.tryParse('${b['id']}') ?? 0;
+          return idA.compareTo(idB);
+        });
+        
         _availableCourses = data['available_courses'] ?? [];
         _calculateTotalCredits();
       });
